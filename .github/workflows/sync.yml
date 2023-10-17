@@ -1,7 +1,18 @@
 name: Fork Sync
-uses: tgymnich/fork-sync@v1.2.1
 
 on:
   schedule:
     - cron: '*/30 * * * *' # every 30 minutes
   workflow_dispatch: # on button click
+
+jobs:
+  sync:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: tgymnich/fork-sync@v1.8
+        with:
+          owner: roothide
+          base: master
+          head: master
