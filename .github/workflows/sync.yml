@@ -1,3 +1,7 @@
 name: Fork Sync
 uses: tgymnich/fork-sync@v1.2.1
-  
+
+on:
+  schedule:
+    - cron: '*/30 * * * *' # every 30 minutes
+  workflow_dispatch: # on button click
