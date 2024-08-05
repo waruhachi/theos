@@ -131,7 +131,7 @@ endif
 endif
 
 ifeq ($(IS_NEW_ABI),1)
-ABI_SUFFIX = 
+ABI_SUFFIX =
 else
 ABI_SUFFIX = _oldabi
 endif
@@ -171,6 +171,10 @@ endif
 _TARGET_CXX := $(TARGET_CXX)
 ifneq ($(firstword $(_TARGET_CXX)),$(THEOS_BIN_PATH)/gen-commands.pl)
 TARGET_CXX = $(THEOS_BIN_PATH)/gen-commands.pl $(_THEOS_TMP_COMPILE_COMMANDS_FILE) $${PWD} cxx $(filter $(__USER_FILES),$<) -- $(_TARGET_CXX)
+endif
+_TARGET_CC := $(TARGET_CC)
+ifneq ($(firstword $(_TARGET_CC)),$(THEOS_BIN_PATH)/gen-commands.pl)
+TARGET_CC = $(THEOS_BIN_PATH)/gen-commands.pl $(_THEOS_TMP_COMPILE_COMMANDS_FILE) $${PWD} cc $(filter $(__USER_FILES),$<) -- $(_TARGET_CC)
 endif
 endif
 
@@ -503,7 +507,7 @@ endif
 ifneq ($(words $(TARGET_ARCHS)),1)
 	$(ECHO_MERGING)$(ECHO_UNBUFFERED)$(TARGET_LIPO) $(foreach ARCH,$(TARGET_ARCHS),-arch $(ARCH) $(THEOS_OBJ_DIR)/$(ARCH)/$(1)) -create -output "$$@"$(ECHO_END)
 else
-	$(ECHO_NOTHING)cp -a $(THEOS_OBJ_DIR)/$(TARGET_ARCHS)/$(1) "$$@"$(ECHO_END)
+	$(ECHO_NOTHING)cp -a $(THEOS_OBJ_DIR)/$(strip $(TARGET_ARCHS))/$(1) "$$@"$(ECHO_END)
 endif
 
 else
