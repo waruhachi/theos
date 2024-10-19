@@ -1,9 +1,6 @@
 name: Update Theos Submodules
 
 on:
-  push:
-    branches:
-      - master
   workflow_dispatch:
   repository_dispatch:
     types: [org_push]
