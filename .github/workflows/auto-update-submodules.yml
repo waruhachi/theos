@@ -1,9 +1,11 @@
-name: Update Theos Submodules
+name: Auto Update Theos Submodules
 
 on:
   push:
     branches:
       - master
+  schedule:
+    - cron: '*/30 * * * *' # every 30 minutes
   workflow_dispatch:
 
 jobs:
