@@ -57,12 +57,13 @@ if [[ $CSHELL == sh || $CSHELL == bash || $CSHELL == dash ]]; then
 	fi
 elif [[ $CSHELL == zsh ]]; then
 	# Zsh prioritizes zshenv > zprofile > zshrc
-	if [[ -f $HOME/.zshenv ]]; then
-		SHELL_ENV="$HOME/.zshenv"
-	elif [[ -f $HOME/.zprofile ]]; then
-		SHELL_ENV="$HOME/.zprofile"
+        zdot="${ZDOTDIR:-$HOME}"
+	if [[ -f $zdot/.zshenv ]]; then
+		SHELL_ENV="$zdot/.zshenv"
+	elif [[ -f $zdot/.zprofile ]]; then
+		SHELL_ENV="$zdot/.zprofile"
 	else
-		SHELL_ENV="$HOME/.zshrc"
+		SHELL_ENV="$zdot/.zshrc"
 	fi
 # TODO
 # elif [[ $CSHELL == csh ]]; then
@@ -354,7 +355,7 @@ linux() {
 				|| (error "Dependency install command seems to have encountered an error. Please see the log above."; exit 3)
 			;;
 		redhat)
-			sudo dnf group install -y "C Development Tools and Libraries" --refresh \
+			sudo dnf group install -y "c-development" --refresh \
 				&& update "Dependencies have been successfully installed!" \
 				|| (error "Dependency install command seems to have encountered an error. Please see the log above."; exit 3)
 			sudo dnf install -y fakeroot lzma libbsd rsync curl perl zip git libxml2 \
