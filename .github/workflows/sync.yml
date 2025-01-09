@@ -2,7 +2,7 @@ name: Fork Sync
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # every 30 minutes
+    - cron: '0 */3 * * *' # every 3 hours
   workflow_dispatch: # on button click
 
 jobs:
@@ -14,23 +14,32 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
+          submodules: recursive
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Merge upstream changes
         run: |
+          set -e
+          set -x
+
           git config --global user.name "$GITHUB_ACTOR"
           git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
           git remote add upstream https://github.com/theos/theos.git
+          git checkout master && git fetch upstream && git merge upstream/master
+
+          cd vendor/lib
+          git remote add upstream https://github.com/theos/lib.git
           git checkout master && git fetch upstream && git merge upstream/master && git push
-          git submodule update --remote vendor/lib
-          git submodule update --remote vendor/include
-          git commit --all -m "[submodules] Update submodules to the latest commit" && git push || echo "No changes to submodules"
-          curl --fail -X PUT \
-          -H "Accept: application/vnd.github.v3+json" \
-          -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
-          https://api.github.com/repos/roothide/lib/actions/workflows/sync.yml/enable
-          curl --fail -X PUT \
-          -H "Accept: application/vnd.github.v3+json" \
-          -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
-          https://api.github.com/repos/roothide/headers/actions/workflows/sync.yml/enable
+          cd -
+          
+          cd vendor/include
+          git remote add upstream https://github.com/theos/headers.git
+          git checkout master && git fetch upstream && git merge upstream/master && git push
+          cd -
+
+          # revert submodules to upstream commits
+          git submodule update --recursive
+
+          git commit --all -m "Sync Repo" && git push || echo "No changes"
           
