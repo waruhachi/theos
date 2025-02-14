@@ -26,7 +26,7 @@ jobs:
           git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
           git remote add upstream https://github.com/theos/theos.git
-          git checkout master && git fetch upstream && git merge upstream/master --no-edit
+          git checkout master && git fetch upstream
 
           cd vendor/lib
           git remote add upstream https://github.com/theos/lib.git
@@ -37,10 +37,6 @@ jobs:
           git remote add upstream https://github.com/theos/headers.git
           git checkout master && git fetch upstream && git merge upstream/master --no-edit && git push
           cd -
-
-          # revert submodules to upstream commits
-          git submodule update --recursive
-
-          git commit -m "Sync Repo" || echo "No changes to commit"
-          git push || echo "No changes to push"
+            
+          git merge upstream/master --no-edit && git push
           
