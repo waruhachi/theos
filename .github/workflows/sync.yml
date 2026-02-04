@@ -2,12 +2,11 @@ name: Fork Sync
 
 on:
   schedule:
-    - cron: '0 */3 * * *' # every 3 hours
-  workflow_dispatch: # on button click
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   sync:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -17,26 +16,47 @@ jobs:
           submodules: recursive
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
+      - name: Configure git
+        run: |
+          git config --global user.name "$GITHUB_ACTOR"
+          git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
       - name: Merge upstream changes
         run: |
           set -e
           set -x
 
-          git config --global user.name "$GITHUB_ACTOR"
-          git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
-          git remote add upstream https://github.com/theos/theos.git
-          git checkout master && git fetch upstream
-
-          cd vendor/lib
-          git remote add upstream https://github.com/theos/lib.git
-          git checkout master && git fetch upstream && git merge upstream/master --no-edit && git push
-          cd -
+          # Add upstream remote (roothide's fork)
+          git remote add upstream https://github.com/roothide/theos.git
           
-          cd vendor/include
-          git remote add upstream https://github.com/theos/headers.git
-          git checkout master && git fetch upstream && git merge upstream/master --no-edit && git push
-          cd -
-            
-          git merge upstream/master --no-edit && git push
+          # Fetch latest changes
+          git fetch upstream
+          git checkout main
+          
+          # Attempt merge
+          if ! git merge upstream/master --no-edit; then
+            echo "::warning::Merge conflict detected. Manual intervention required."
+            git merge --abort
+            exit 1
+          fi
+
+      - name: Update submodules
+        run: |
+          set -e
+          set -x
+
+          # Update all submodules to their latest remote versions
+          git submodule update --remote --merge
+          
+          # Check if there are any submodule changes
+          if git diff --cached --quiet; then
+            echo "No submodule updates"
+          else
+            git add .
+            git commit -m "chore: update submodules to latest versions"
+          fi
+
+      - name: Push changes
+        run: |
+          git push origin main
           
