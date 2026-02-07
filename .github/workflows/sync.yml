@@ -14,7 +14,6 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Configure git
         run: |
